@@ -20,7 +20,7 @@ class _MarketScreenState extends State<MarketScreen> {
   // -----------------------
   // Change to your deployed API base URL. For Android emulator use http://10.0.2.2:5000
   final String apiBase = 'http://10.0.2.2:5000';
-  final String apiKey = '579b464db66ec23bdd00000186a3ab5c257843e0633f348512a69c8a';
+  final String apiKey = 'ADD_YOUR_MARKET_API_KEY_HERE';
 
   // -----------------------
   // STATE
@@ -34,16 +34,56 @@ class _MarketScreenState extends State<MarketScreen> {
 
   // default fallback products
   final List<MarketPrice> _defaultProducts = [
-    MarketPrice(crop: 'wheat', pricePerKg: 25.39, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'rice', pricePerKg: 40.0, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'onion', pricePerKg: 13.7, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'potato', pricePerKg: 13.46, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'tomato', pricePerKg: 25.16, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'banana', pricePerKg: 17.23, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'sugar', pricePerKg: 42.5, exampleMarket: 'Local mill', exampleSource: 'default'),
-    MarketPrice(crop: 'maize', pricePerKg: 23.0, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'soybean', pricePerKg: 45.0, exampleMarket: 'Local mandi', exampleSource: 'default'),
-    MarketPrice(crop: 'chilli', pricePerKg: 120.0, exampleMarket: 'Local mandi', exampleSource: 'default'),
+    MarketPrice(
+        crop: 'wheat',
+        pricePerKg: 25.39,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'rice',
+        pricePerKg: 40.0,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'onion',
+        pricePerKg: 13.7,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'potato',
+        pricePerKg: 13.46,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'tomato',
+        pricePerKg: 25.16,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'banana',
+        pricePerKg: 17.23,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'sugar',
+        pricePerKg: 42.5,
+        exampleMarket: 'Local mill',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'maize',
+        pricePerKg: 23.0,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'soybean',
+        pricePerKg: 45.0,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
+    MarketPrice(
+        crop: 'chilli',
+        pricePerKg: 120.0,
+        exampleMarket: 'Local mandi',
+        exampleSource: 'default'),
   ];
 
   // counter used to ignore stale API responses
@@ -78,9 +118,12 @@ class _MarketScreenState extends State<MarketScreen> {
       });
     } else {
       final lower = query.toLowerCase();
-      final matches = _defaultProducts.where((p) => p.crop.toLowerCase().contains(lower)).toList();
+      final matches = _defaultProducts
+          .where((p) => p.crop.toLowerCase().contains(lower))
+          .toList();
       if (matches.isNotEmpty) {
-        final rest = _defaultProducts.where((p) => !matches.contains(p)).toList();
+        final rest =
+            _defaultProducts.where((p) => !matches.contains(p)).toList();
         setState(() {
           _prices = [...matches, ...rest];
           _errorMessage = null;
@@ -152,50 +195,66 @@ class _MarketScreenState extends State<MarketScreen> {
     });
 
     try {
-      final uri = Uri.parse('$apiBase/api/prices?crop=${Uri.encodeComponent(query)}');
-      final headers = {'Accept': 'application/json', 'Authorization': 'Bearer $apiKey'};
+      final uri =
+          Uri.parse('$apiBase/api/prices?crop=${Uri.encodeComponent(query)}');
+      final headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $apiKey'
+      };
 
-      final resp = await http.get(uri, headers: headers).timeout(const Duration(seconds: 12));
+      final resp = await http
+          .get(uri, headers: headers)
+          .timeout(const Duration(seconds: 12));
 
       // ignore stale responses
       if (thisSearchId != _searchCounter) return;
 
       if (resp.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(resp.body) as Map<String, dynamic>;
+        final Map<String, dynamic> jsonData =
+            json.decode(resp.body) as Map<String, dynamic>;
         final raw = (jsonData['prices'] as List<dynamic>?) ?? [];
 
         if (raw.isEmpty) {
           // API returned nothing — fallback to matching default
-          _fallbackToDefaultMatch(query, note: 'No live data found for "$query". Showing default match.');
+          _fallbackToDefaultMatch(query,
+              note: 'No live data found for "$query". Showing default match.');
           _lastUpdated = jsonData['last_updated'] as String?;
         } else {
           // parse and show results, promoting search match to front
-          final fetched = raw.map((e) => MarketPrice.fromJson(e as Map<String, dynamic>)).toList();
+          final fetched = raw
+              .map((e) => MarketPrice.fromJson(e as Map<String, dynamic>))
+              .toList();
           final promoted = _promoteQueryInList(fetched, query);
           setState(() {
             _prices = promoted;
-            _lastUpdated = jsonData['last_updated'] as String? ?? (promoted.isNotEmpty ? promoted.first.lastFetched : null);
+            _lastUpdated = jsonData['last_updated'] as String? ??
+                (promoted.isNotEmpty ? promoted.first.lastFetched : null);
             _errorMessage = null;
           });
         }
       } else if (resp.statusCode == 401 || resp.statusCode == 403) {
         // auth error -> fallback to default match
-        _fallbackToDefaultMatch(query, note: 'Unauthorized — check API key. Showing default match.');
+        _fallbackToDefaultMatch(query,
+            note: 'Unauthorized — check API key. Showing default match.');
       } else {
         // server error -> fallback
-        _fallbackToDefaultMatch(query, note: 'Server error (${resp.statusCode}). Showing default match.');
+        _fallbackToDefaultMatch(query,
+            note: 'Server error (${resp.statusCode}). Showing default match.');
       }
     } on TimeoutException {
       if (thisSearchId != _searchCounter) return;
 
       // Promote default match on timeout
       final lower = query.toLowerCase();
-      final matches = _defaultProducts.where((p) => p.crop.toLowerCase().contains(lower)).toList();
+      final matches = _defaultProducts
+          .where((p) => p.crop.toLowerCase().contains(lower))
+          .toList();
 
       setState(() {
         _errorMessage = 'Request timed out. Showing default match.';
         if (matches.isNotEmpty) {
-          final rest = _defaultProducts.where((p) => !matches.contains(p)).toList();
+          final rest =
+              _defaultProducts.where((p) => !matches.contains(p)).toList();
           _prices = [...matches, ...rest];
         } else {
           _prices = List<MarketPrice>.from(_defaultProducts);
@@ -206,12 +265,16 @@ class _MarketScreenState extends State<MarketScreen> {
 
       // On any other error, promote default match
       final lower = query.toLowerCase();
-      final matches = _defaultProducts.where((p) => p.crop.toLowerCase().contains(lower)).toList();
+      final matches = _defaultProducts
+          .where((p) => p.crop.toLowerCase().contains(lower))
+          .toList();
 
       setState(() {
-        _errorMessage = 'Failed to search: ${e.toString()}. Showing default match.';
+        _errorMessage =
+            'Failed to search: ${e.toString()}. Showing default match.';
         if (matches.isNotEmpty) {
-          final rest = _defaultProducts.where((p) => !matches.contains(p)).toList();
+          final rest =
+              _defaultProducts.where((p) => !matches.contains(p)).toList();
           _prices = [...matches, ...rest];
         } else {
           _prices = List<MarketPrice>.from(_defaultProducts);
@@ -230,12 +293,15 @@ class _MarketScreenState extends State<MarketScreen> {
   // Ensures matches appear first.
   void _fallbackToDefaultMatch(String query, {String? note}) {
     final lower = query.toLowerCase();
-    final matches = _defaultProducts.where((p) => p.crop.toLowerCase().contains(lower)).toList();
+    final matches = _defaultProducts
+        .where((p) => p.crop.toLowerCase().contains(lower))
+        .toList();
 
     setState(() {
       _errorMessage = note;
       if (matches.isNotEmpty) {
-        final rest = _defaultProducts.where((p) => !matches.contains(p)).toList();
+        final rest =
+            _defaultProducts.where((p) => !matches.contains(p)).toList();
         _prices = [...matches, ...rest];
       } else {
         _prices = List<MarketPrice>.from(_defaultProducts);
@@ -253,13 +319,19 @@ class _MarketScreenState extends State<MarketScreen> {
 
     try {
       final uri = Uri.parse('$apiBase/api/prices');
-      final headers = {'Accept': 'application/json', 'Authorization': 'Bearer $apiKey'};
-      final resp = await http.get(uri, headers: headers).timeout(const Duration(seconds: 12));
+      final headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $apiKey'
+      };
+      final resp = await http
+          .get(uri, headers: headers)
+          .timeout(const Duration(seconds: 12));
 
       if (thisSearchId != _searchCounter) return;
 
       if (resp.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(resp.body) as Map<String, dynamic>;
+        final Map<String, dynamic> jsonData =
+            json.decode(resp.body) as Map<String, dynamic>;
         final raw = (jsonData['prices'] as List<dynamic>?) ?? [];
         if (raw.isEmpty) {
           setState(() {
@@ -267,12 +339,17 @@ class _MarketScreenState extends State<MarketScreen> {
             _prices = List<MarketPrice>.from(_defaultProducts);
           });
         } else {
-          final fetched = raw.map((e) => MarketPrice.fromJson(e as Map<String, dynamic>)).toList();
+          final fetched = raw
+              .map((e) => MarketPrice.fromJson(e as Map<String, dynamic>))
+              .toList();
           final currentQuery = _searchController.text.trim();
-          final promoted = currentQuery.isNotEmpty ? _promoteQueryInList(fetched, currentQuery) : fetched;
+          final promoted = currentQuery.isNotEmpty
+              ? _promoteQueryInList(fetched, currentQuery)
+              : fetched;
           setState(() {
             _prices = promoted;
-            _lastUpdated = jsonData['last_updated'] as String? ?? (promoted.isNotEmpty ? promoted.first.lastFetched : null);
+            _lastUpdated = jsonData['last_updated'] as String? ??
+                (promoted.isNotEmpty ? promoted.first.lastFetched : null);
           });
         }
       } else {
@@ -311,7 +388,8 @@ class _MarketScreenState extends State<MarketScreen> {
       await _performSearchAndPromote(q);
     }
     if (_errorMessage != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(_errorMessage!)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(_errorMessage!)));
     }
   }
 
@@ -387,13 +465,13 @@ class _MarketScreenState extends State<MarketScreen> {
                       prefixIcon: const Icon(Icons.search),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged();
-                          FocusScope.of(context).unfocus();
-                        },
-                      )
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                _onSearchChanged();
+                                FocusScope.of(context).unfocus();
+                              },
+                            )
                           : null,
                       contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       border: OutlineInputBorder(
@@ -405,7 +483,10 @@ class _MarketScreenState extends State<MarketScreen> {
                 ),
                 const SizedBox(width: 8),
                 if (_isSearching)
-                  const SizedBox(width: 36, height: 36, child: CircularProgressIndicator(strokeWidth: 2))
+                  const SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: CircularProgressIndicator(strokeWidth: 2))
                 else
                   IconButton(
                     icon: const Icon(Icons.search),
@@ -427,16 +508,19 @@ class _MarketScreenState extends State<MarketScreen> {
         children: [
           Card(
             elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text(_errorMessage ?? 'No products to show', style: const TextStyle(fontSize: 16)),
+                  Text(_errorMessage ?? 'No products to show',
+                      style: const TextStyle(fontSize: 16)),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: _onRefresh,
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryGreen),
                     child: const Text('Try again'),
                   ),
                 ],
@@ -460,17 +544,26 @@ class _MarketScreenState extends State<MarketScreen> {
 
   Widget _buildHeaderCard() {
     final query = _searchController.text.trim();
-    final title = query.isEmpty ? 'Popular Products (per 1 kg)' : 'Search: "$query"';
-    final subtitle = _lastUpdated != null ? 'Last refreshed: $_lastUpdated' : (_errorMessage ?? 'Showing results');
+    final title =
+        query.isEmpty ? 'Popular Products (per 1 kg)' : 'Search: "$query"';
+    final subtitle = _lastUpdated != null
+        ? 'Last refreshed: $_lastUpdated'
+        : (_errorMessage ?? 'Showing results');
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: _isSearching ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : null,
+        trailing: _isSearching
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2))
+            : null,
       ),
     );
   }
@@ -482,21 +575,28 @@ class _MarketScreenState extends State<MarketScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.all(14),
-        title: Text(_capitalize(data.crop), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text(_capitalize(data.crop),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (data.exampleMarket != null) Text(data.exampleMarket!, style: TextStyle(color: AppColors.textSecondary)),
+            if (data.exampleMarket != null)
+              Text(data.exampleMarket!,
+                  style: TextStyle(color: AppColors.textSecondary)),
             const SizedBox(height: 6),
-            Text('Source: ${data.exampleSource ?? '—'}', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            Text('Source: ${data.exampleSource ?? '—'}',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           ],
         ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('₹${data.pricePerKg?.toStringAsFixed(2) ?? '—'} / kg', style: TextStyle(fontSize: 16, color: AppColors.accentBlue)),
+            Text('₹${data.pricePerKg?.toStringAsFixed(2) ?? '—'} / kg',
+                style: TextStyle(fontSize: 16, color: AppColors.accentBlue)),
             const SizedBox(height: 6),
-            if (data.lastFetched != null) Text(data.lastFetched!, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            if (data.lastFetched != null)
+              Text(data.lastFetched!,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54)),
           ],
         ),
         onTap: () => _showPriceDetails(data),
@@ -508,24 +608,59 @@ class _MarketScreenState extends State<MarketScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: Colors.grey.shade400, borderRadius: BorderRadius.circular(2))),
-              Text(_capitalize(item.crop), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryGreen)),
+              Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(2))),
+              Text(_capitalize(item.crop),
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryGreen)),
               const SizedBox(height: 8),
-              if (item.exampleMarket != null) Text(item.exampleMarket!, style: TextStyle(color: AppColors.textSecondary)),
+              if (item.exampleMarket != null)
+                Text(item.exampleMarket!,
+                    style: TextStyle(color: AppColors.textSecondary)),
               const SizedBox(height: 12),
-              ListTile(leading: const Icon(Icons.monetization_on), title: const Text('Price per 1 kg'), subtitle: Text('₹${item.pricePerKg?.toStringAsFixed(2) ?? '—'}')),
-              if (item.exampleSource != null) ListTile(leading: const Icon(Icons.source), title: const Text('Source'), subtitle: Text(item.exampleSource!)),
-              if (item.sourcesCovered != null) ListTile(leading: const Icon(Icons.link), title: const Text('Sources aggregated'), subtitle: Text('${item.sourcesCovered}')),
-              if (item.lastFetched != null) ListTile(leading: const Icon(Icons.access_time), title: const Text('Last fetched'), subtitle: Text(item.lastFetched!)),
+              ListTile(
+                  leading: const Icon(Icons.monetization_on),
+                  title: const Text('Price per 1 kg'),
+                  subtitle:
+                      Text('₹${item.pricePerKg?.toStringAsFixed(2) ?? '—'}')),
+              if (item.exampleSource != null)
+                ListTile(
+                    leading: const Icon(Icons.source),
+                    title: const Text('Source'),
+                    subtitle: Text(item.exampleSource!)),
+              if (item.sourcesCovered != null)
+                ListTile(
+                    leading: const Icon(Icons.link),
+                    title: const Text('Sources aggregated'),
+                    subtitle: Text('${item.sourcesCovered}')),
+              if (item.lastFetched != null)
+                ListTile(
+                    leading: const Icon(Icons.access_time),
+                    title: const Text('Last fetched'),
+                    subtitle: Text(item.lastFetched!)),
               const SizedBox(height: 8),
-              SizedBox(width: double.infinity, child: ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen), child: const Text('Close'))),
+              SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryGreen),
+                      child: const Text('Close'))),
             ],
           ),
         );
@@ -533,7 +668,8 @@ class _MarketScreenState extends State<MarketScreen> {
     );
   }
 
-  String _capitalize(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
 
 class MarketPrice {
@@ -556,11 +692,19 @@ class MarketPrice {
   factory MarketPrice.fromJson(Map<String, dynamic> json) {
     return MarketPrice(
       crop: (json['crop'] as String?) ?? 'unknown',
-      pricePerKg: (json['price_per_kg'] is num) ? (json['price_per_kg'] as num).toDouble() : (json['price_per_kg'] != null ? double.tryParse(json['price_per_kg'].toString()) : null),
+      pricePerKg: (json['price_per_kg'] is num)
+          ? (json['price_per_kg'] as num).toDouble()
+          : (json['price_per_kg'] != null
+              ? double.tryParse(json['price_per_kg'].toString())
+              : null),
       exampleMarket: json['example_market'] as String?,
       exampleSource: json['example_source'] as String?,
       lastFetched: json['last_fetched'] as String?,
-      sourcesCovered: json['sources_covered'] is int ? json['sources_covered'] as int : (json['sources_covered'] != null ? int.tryParse(json['sources_covered'].toString()) : null),
+      sourcesCovered: json['sources_covered'] is int
+          ? json['sources_covered'] as int
+          : (json['sources_covered'] != null
+              ? int.tryParse(json['sources_covered'].toString())
+              : null),
     );
   }
 
