@@ -19,8 +19,8 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   String? _error;
   bool _loading = true;
 
-  // 🔑 Replace with your actual OpenWeatherMap API key
-  static const String _apiKey = '75598a8a90c0ffe9808a58fc497c6391';
+  //  Replace with your actual OpenWeatherMap API key
+  static const String _apiKey = 'API_KEY_HERE';
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       if (permission == LocationPermission.deniedForever) {
         setState(() {
           _error =
-          'Location permission permanently denied. Enable it in system settings.';
+              'Location permission permanently denied. Enable it in system settings.';
           _loading = false;
         });
         return;
@@ -99,7 +99,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$_apiKey&units=metric';
 
       final response =
-      await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
 
       // Debug print — helps diagnose 401/429/etc.
       // ignore: avoid_print
@@ -110,8 +110,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _description =
-              (data['weather']?[0]?['description'] ?? '').toString();
+          _description = (data['weather']?[0]?['description'] ?? '').toString();
           _tempC = double.tryParse(data['main']?['temp']?.toString() ?? '');
           _city = data['name']?.toString() ?? '';
           _loading = false;
@@ -156,19 +155,21 @@ class _WeatherWidgetState extends State<WeatherWidget> {
             TextField(
               controller: latCtl,
               keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(labelText: 'Latitude'),
             ),
             TextField(
               controller: lonCtl,
               keyboardType:
-              const TextInputType.numberWithOptions(decimal: true),
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: const InputDecoration(labelText: 'Longitude'),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
